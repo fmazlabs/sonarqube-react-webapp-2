@@ -51,6 +51,7 @@ pipeline:
                       product_domain: http://52.66.59.93:9000
                       product_project_name: sonarharness
                       product_project_key: <+secrets.getValue("sonarharness")>
+                      fail_on_severity: Info
                     imagePullPolicy: Always
                   description: Sonar Scan Orchestrated
                   timeout: 1h
