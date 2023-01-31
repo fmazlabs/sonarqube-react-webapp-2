@@ -1,0 +1,67 @@
+pipeline:
+  name: vulneapp2
+  identifier: vulneapp2
+  projectIdentifier: Shell
+  orgIdentifier: default
+  tags: {}
+  properties:
+    ci:
+      codebase:
+        connectorRef: account.fmazlabsgit
+        repoName: fmreactvulnapp
+        build: <+input>
+  stages:
+    - stage:
+        name: Scan React App
+        identifier: Scan_React_App
+        description: ""
+        type: CI
+        spec:
+          cloneCodebase: true
+          serviceDependencies:
+            - identifier: DinD
+              name: DinD
+              type: Service
+              description: DinD
+              spec:
+                connectorRef: account.harnessImage
+                image: docker:dind
+          platform:
+            os: Linux
+            arch: Amd64
+          runtime:
+            type: Cloud
+            spec: {}
+          execution:
+            steps:
+              - step:
+                  type: Security
+                  name: Sonar Scan Orchestrated
+                  identifier: Sonar_Scan_Orchestrated
+                  spec:
+                    privileged: true
+                    settings:
+                      policy_type: orchestratedScan
+                      scan_type: repository
+                      product_name: sonarqube
+                      product_config_name: default
+                      repository_project: fmreactvulnapp
+                      repository_branch: <+codebase.branch>
+                      product_access_token: <+secrets.getValue("sonartoken")>
+                      product_domain: http://52.66.59.93:9000
+                      product_project_name: sonarharness
+                      product_project_key: <+secrets.getValue("sonarharness")>
+                    imagePullPolicy: Always
+                  description: Sonar Scan Orchestrated
+                  timeout: 1h
+              - step:
+                  type: Run
+                  name: Yarn Build
+                  identifier: Yarn_Build
+                  spec:
+                    shell: Sh
+                    command: |-
+                      yarn install
+                      yarn build
+                  description: Yarn Build
+  timeout: 1h
