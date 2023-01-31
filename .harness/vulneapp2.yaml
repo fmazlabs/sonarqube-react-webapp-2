@@ -54,6 +54,14 @@ pipeline:
                     imagePullPolicy: Always
                   description: Sonar Scan Orchestrated
                   timeout: 1h
+                  when:
+                    stageStatus: Success
+                  failureStrategies:
+                    - onFailure:
+                        errors:
+                          - AllErrors
+                        action:
+                          type: Abort
               - step:
                   type: Run
                   name: Yarn Build
